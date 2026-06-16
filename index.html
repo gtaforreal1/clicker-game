@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coin Clicker - Get Rich Quick!</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Main Game Area -->
+        <div class="game-section">
+            <div class="coin-display">
+                <h1>💰 Coins</h1>
+                <div class="coin-count" id="coinCount">0</div>
+            </div>
+
+            <!-- Click Button -->
+            <button class="click-btn" id="clickBtn" onmousedown="handleMouseDown()" onmouseup="handleMouseUp()">
+                <span class="coin-icon">🪙</span>
+                <span class="click-text">CLICK ME!</span>
+            </button>
+
+            <!-- Cheat Detection Warning -->
+            <div class="cheat-warning" id="cheatWarning" style="display: none;">
+                ⚠️ Auto-click detected! You must manually click.
+            </div>
+
+            <!-- Stats -->
+            <div class="stats">
+                <div class="stat">
+                    <span>Clicks:</span>
+                    <span id="clickCount">0</span>
+                </div>
+                <div class="stat">
+                    <span>Per Click:</span>
+                    <span id="perClick">1</span>
+                </div>
+                <div class="stat">
+                    <span>Cheats Blocked:</span>
+                    <span id="cheatsBlocked">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upgrades Section -->
+        <div class="upgrades-section">
+            <h2>⬆️ Upgrades</h2>
+            <div class="upgrades-grid" id="upgradesGrid">
+                <!-- Upgrades will be dynamically inserted here -->
+            </div>
+        </div>
+
+        <!-- Leaderboard Section -->
+        <div class="leaderboard-section">
+            <h2>🏆 Leaderboard</h2>
+            <div class="leaderboard-info">Updates every 90 seconds</div>
+            <div class="leaderboard" id="leaderboard">
+                <div class="leaderboard-placeholder">Loading leaderboard...</div>
+            </div>
+        </div>
+
+        <!-- User Info -->
+        <div class="user-info">
+            <div class="user-rank">Your Rank: <span id="userRank">-</span></div>
+            <div class="player-name">
+                <input type="text" id="playerName" placeholder="Enter your name" maxlength="20">
+                <button onclick="setPlayerName()">Save Name</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
