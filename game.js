@@ -22,6 +22,7 @@ let passiveIncomeInterval = null;
 let autoClickInterval = null;
 let leaderboardUpdateInterval = null;
 let cheatsAttempted = 0;
+let clickProcessing = false;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -40,45 +41,47 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Mouse detection for anti-cheat
-document.addEventListener('mousedown', (e) => {
-    isMousePressed = true;
-    lastClickCoords = { x: e.clientX, y: e.clientY };
-    lastClickTime = Date.now();
-});
+// Mouse detection for anti-cheat - ONLY for button
+const clickBtn = document.getElementById('clickBtn');
 
-document.addEventListener('mouseup', () => {
-    isMousePressed = false;
-});
-
-// Button mouse handlers
-function handleMouseDown() {
-    if (!isMousePressed) {
-        detectCheat();
-    }
-}
-
-function handleMouseUp() {
-    // Click will be registered here
-}
-
-// Click Handler
-document.getElementById('clickBtn').addEventListener('click', () => {
-    if (!isMousePressed) {
-        detectCheat();
-        return;
-    }
+if (clickBtn) {
+    clickBtn.addEventListener('mousedown', (e) => {
+        isMousePressed = true;
+    });
     
-    // Legitimate click
-    const coinsPerClick = gameState.perClick;
-    gameState.coins += coinsPerClick;
-    gameState.clicks++;
+    clickBtn.addEventListener('mouseup', (e) => {
+        isMousePressed = false;
+    });
     
-    updateDisplay();
-    animateClick();
-    saveGameState();
-    submitScore();
-});
+    // SINGLE CLICK HANDLER - NO DOUBLE EVENTS
+    clickBtn.addEventListener('click', (e) => {
+        // Prevent double clicks
+        if (clickProcessing) return;
+        
+        // Check if this was a real mouse click
+        if (!isMousePressed) {
+            detectCheat();
+            return;
+        }
+        
+        clickProcessing = true;
+        
+        // Legitimate click
+        const coinsPerClick = gameState.perClick;
+        gameState.coins += coinsPerClick;
+        gameState.clicks++;
+        
+        updateDisplay();
+        animateClick();
+        saveGameState();
+        submitScore();
+        
+        // Reset click processing
+        setTimeout(() => {
+            clickProcessing = false;
+        }, 100);
+    });
+}
 
 // Anti-Cheat Detection
 function detectCheat() {
@@ -92,11 +95,13 @@ function detectCheat() {
 
 function showCheatWarning() {
     const warning = document.getElementById('cheatWarning');
-    warning.style.display = 'block';
-    
-    setTimeout(() => {
-        warning.style.display = 'none';
-    }, 3000);
+    if (warning) {
+        warning.style.display = 'block';
+        
+        setTimeout(() => {
+            warning.style.display = 'none';
+        }, 3000);
+    }
 }
 
 // Passive Income
@@ -133,6 +138,8 @@ function startAutoClick() {
 // Upgrades
 function initializeUpgrades() {
     const upgradesGrid = document.getElementById('upgradesGrid');
+    if (!upgradesGrid) return;
+    
     upgradesGrid.innerHTML = '';
     
     Object.keys(gameState.upgrades).forEach(key => {
@@ -213,10 +220,15 @@ function updateUpgradesDisplay() {
 
 // Display Updates
 function updateDisplay() {
-    document.getElementById('coinCount').textContent = formatNumber(gameState.coins);
-    document.getElementById('clickCount').textContent = gameState.clicks;
-    document.getElementById('perClick').textContent = gameState.perClick;
-    document.getElementById('cheatsBlocked').textContent = gameState.cheatsBlocked;
+    const coinCount = document.getElementById('coinCount');
+    const clickCount = document.getElementById('clickCount');
+    const perClick = document.getElementById('perClick');
+    const cheatsBlocked = document.getElementById('cheatsBlocked');
+    
+    if (coinCount) coinCount.textContent = formatNumber(gameState.coins);
+    if (clickCount) clickCount.textContent = gameState.clicks;
+    if (perClick) perClick.textContent = gameState.perClick;
+    if (cheatsBlocked) cheatsBlocked.textContent = gameState.cheatsBlocked;
     
     updateUpgradesDisplay();
 }
@@ -228,13 +240,14 @@ function formatNumber(num) {
 }
 
 function animateClick() {
-    const btn = document.getElementById('clickBtn');
     const coinCount = document.getElementById('coinCount');
     
-    coinCount.style.animation = 'none';
-    setTimeout(() => {
-        coinCount.style.animation = 'coinPulse 0.3s ease-in-out';
-    }, 10);
+    if (coinCount) {
+        coinCount.style.animation = 'none';
+        setTimeout(() => {
+            coinCount.style.animation = 'coinPulse 0.3s ease-in-out';
+        }, 10);
+    }
 }
 
 // Leaderboard
@@ -263,6 +276,8 @@ function updateLeaderboard() {
     const sortedScores = scores.sort((a, b) => b.coins - a.coins).slice(0, 10);
     
     const leaderboard = document.getElementById('leaderboard');
+    if (!leaderboard) return;
+    
     leaderboard.innerHTML = '';
     
     if (sortedScores.length === 0) {
@@ -292,7 +307,10 @@ function updateLeaderboard() {
     
     // Update user rank
     const userRank = sortedScores.findIndex(s => s.name === gameState.playerName);
-    document.getElementById('userRank').textContent = userRank !== -1 ? `#${userRank + 1}` : '-';
+    const userRankEl = document.getElementById('userRank');
+    if (userRankEl) {
+        userRankEl.textContent = userRank !== -1 ? `#${userRank + 1}` : '-';
+    }
 }
 
 function startLeaderboardRefresh() {
@@ -305,6 +323,8 @@ function startLeaderboardRefresh() {
 
 function setPlayerName() {
     const nameInput = document.getElementById('playerName');
+    if (!nameInput) return;
+    
     const newName = nameInput.value.trim();
     
     if (newName && newName.length > 0) {
